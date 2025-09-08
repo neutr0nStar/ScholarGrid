@@ -6,8 +6,8 @@
 3. The user should be able to edit the grid, i.e. add/remove papers and questions
 
 ## Planning
-1. Init frontend and backend
-2. Setup paper ingestion and storage
+1. [X] Init frontend and backend
+2. [X] Setup paper ingestion and storage
 3. Setup paper parsing (PDF -> md)
 4. Library management (Paper crud)
 5. Setup LLMs
@@ -15,6 +15,7 @@
 7. Grid creation (w/o LLM)
 8. With LLM
 9. Grid editing
+10. Frontend...
 
 ## UI
 
