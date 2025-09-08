@@ -11,14 +11,13 @@
     > __TODO__: Title and author extraction is left
 3. [X] Setup paper parsing (PDF -> md)
     > __TODO__: Add more advanced models (marker)
-4. Library management (Paper crud)
-5. Setup LLMs
-6. Create LLM parsing pipeline
-7. Grid creation (w/o LLM)
-8. With LLM
-9. Grid editing
-10. Setup Alembic
-11. Frontend...
+4. [X] Setup LLMs
+5. [X] Create LLM parsing pipeline
+6. Grid creation (w/o LLM)
+7. With LLM
+8. Grid editing
+9. Setup Alembic
+10. Frontend...
 
 ## UI
 
