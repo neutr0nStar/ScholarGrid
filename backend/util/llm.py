@@ -16,6 +16,7 @@ class LLMModels(Enum):
     GPT_OSS_20B = "openai/gpt-oss-20b:free"
     DEEPSEEK_V_3_1 = "deepseek/deepseek-chat-v3.1:free"
     QWEN3_235_B = "qwen/qwen3-235b-a22b:free" # ATM only this works out of the box
+    QWEN3_CODER = "qwen/qwen3-coder:free"
 
 
 class LLMResponseFormat(BaseModel):

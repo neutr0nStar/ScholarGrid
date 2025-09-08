@@ -13,8 +13,8 @@
     > __TODO__: Add more advanced models (marker)
 4. [X] Setup LLMs
 5. [X] Create LLM parsing pipeline
-6. Grid creation (w/o LLM)
-7. With LLM
+6. [X] Grid creation (w/o LLM)
+7. [X] With LLM
 8. Grid editing
 9. Setup Alembic
 10. Frontend...
