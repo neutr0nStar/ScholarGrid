@@ -8,14 +8,17 @@
 ## Planning
 1. [X] Init frontend and backend
 2. [X] Setup paper ingestion and storage
-3. Setup paper parsing (PDF -> md)
+    > __TODO__: Title and author extraction is left
+3. [X] Setup paper parsing (PDF -> md)
+    > __TODO__: Add more advanced models (marker)
 4. Library management (Paper crud)
 5. Setup LLMs
 6. Create LLM parsing pipeline
 7. Grid creation (w/o LLM)
 8. With LLM
 9. Grid editing
-10. Frontend...
+10. Setup Alembic
+11. Frontend...
 
 ## UI
 

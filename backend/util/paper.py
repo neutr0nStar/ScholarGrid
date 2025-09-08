@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi import UploadFile
 
 
-def generate_pdf_hash(pdf: UploadFile) -> str:
+def generate_pdf_hash(pdf_contents: bytes) -> str:
     """
     Generate a unique SHA-256 hash for a PDF file that can be used as a filename.
     
@@ -23,7 +23,7 @@ def generate_pdf_hash(pdf: UploadFile) -> str:
     sha256_hash = hashlib.sha256()
     
     # Generate hash
-    sha256_hash.update(pdf.file.read())
+    sha256_hash.update(pdf_contents)
     
     # Return the hexadecimal representation of the hash
     return sha256_hash.hexdigest()

@@ -7,5 +7,4 @@ class PaperBase(SQLModel):
 
 class PaperModel(PaperBase, table=True):
     id: str = Field(default=None, primary_key=True)
-    pdf_path: str = Field(description="Path to the PDF of the paper")
-    
+
