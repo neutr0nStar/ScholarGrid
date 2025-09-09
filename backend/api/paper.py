@@ -1,18 +1,20 @@
 import os
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from sqlmodel import select
-import shutil
 
 from backend.core.db import SessionDep
+from backend.core.settings import settings
 from backend.schemas.paper import PaperModel
 from backend.util.paper import generate_pdf_hash
 from backend.util.pdf_to_md import PDF2MD
+from backend.util.llm import LLMModels, MetadataExtractionAgent
 
 router = APIRouter(prefix="/paper", tags=["paper"])
 
-UPLOADS_DIR = "uploads"
-
 pdf_2_md = PDF2MD()
+
+metadata_extraction_agent = MetadataExtractionAgent(LLMModels.DEEPSEEK_V_3)
+
 
 @router.get("/")
 def get_all_papers(session: SessionDep, offset: int = 0, limit: int = 10):
@@ -31,10 +33,10 @@ def get_paper(paper_id: str, session: SessionDep):
 
 
 @router.post("/")
-def create_paper(session: SessionDep, file: UploadFile = File()):
+async def create_paper(session: SessionDep, file: UploadFile = File()):
     # Get file contents
     contents = file.file.read()
-    
+
     _hash = generate_pdf_hash(contents)
 
     # Check if file already exists
@@ -43,20 +45,21 @@ def create_paper(session: SessionDep, file: UploadFile = File()):
         return HTTPException(status_code=400, detail="Paper already exists")
 
     # Save paper to uploads
-    pdf_file_path = f"{UPLOADS_DIR}/{_hash}.pdf"
+    pdf_file_path = f"{settigns.UPLOADS_DIR}/{_hash}.pdf"
     with open(pdf_file_path, "wb") as f:
         f.write(contents)
 
     # Save MD file
-    md_file_path = f"{UPLOADS_DIR}/{_hash}.md"
+    md_file_path = f"{settigns.UPLOADS_DIR}/{_hash}.md"
     md_file_content = pdf_2_md.convert(pdf_file_path)
     with open(md_file_path, "w", encoding="UTF-8") as f:
         f.write(md_file_content)
 
+    # Extract metadata
+    metadata = await metadata_extraction_agent.ainvoke(md_file_content)
+
     # Save paper to database
-    paper = PaperModel(
-        id=_hash, title=_hash, authors="John Doe, Jane Doe"
-    )
+    paper = PaperModel(id=_hash, title=metadata.title, authors=metadata.authors)
     session.add(paper)
     session.commit()
     session.refresh(paper)
@@ -72,8 +75,12 @@ def delete_paper(paper_id: str, session: SessionDep):
         return HTTPException(status_code=404, detail="Paper not found")
 
     # Delet from files
-    if os.path.exists(paper.pdf_path):
-        os.remove(paper.pdf_path)
+    pdf_path = f"{settigns.UPLOADS_DIR}/{paper.id}.pdf"
+    md_path = f"{settigns.UPLOADS_DIR}/{paper.id}.md"
+    if os.path.exists(pdf_path):
+        os.remove(pdf_path)
+    if os.path.exists(md_path):
+        os.remove(md_path)
 
     session.delete(paper)
     session.commit()

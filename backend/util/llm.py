@@ -13,24 +13,35 @@ load_dotenv()
 
 
 class LLMModels(Enum):
+    """
+    LLM Models to choose from (OpenRouter)
+    """
     GPT_OSS_20B = "openai/gpt-oss-20b:free"
-    DEEPSEEK_V_3_1 = "deepseek/deepseek-chat-v3.1:free"
-    QWEN3_235_B = "qwen/qwen3-235b-a22b:free" # ATM only this works out of the box
-    QWEN3_CODER = "qwen/qwen3-coder:free"
+    DEEPSEEK_V_3 = "deepseek/deepseek-chat-v3-0324:free"
+    QWEN3_235_B = "qwen/qwen3-235b-a22b:free"  # ATM only this works out of the box
 
-
-class LLMResponseFormat(BaseModel):
+#
+#   RESPONSE FORMATTER
+#
+class CritiqueResponseFormat(BaseModel):
     responses: List[str] = Field(description="list of responses")
 
 
-class LLMAgent:
+class MetadataResponseFormat(BaseModel):
+    title: str = Field(description="title of the paper")
+    authors: str = Field(description="authors of the paper")
+
+#
+# AGENTS
+#
+class CritiqueAgent:
 
     def __init__(self, model: LLMModels):
         self.llm = ChatOpenAI(
             model=model.value,
             base_url="https://openrouter.ai/api/v1",
             api_key=os.getenv("OPENROUTER_API_KEY"),
-        ).with_structured_output(LLMResponseFormat)
+        ).with_structured_output(CritiqueResponseFormat)
 
         self.prompt = ChatPromptTemplate.from_template(
             """You are a helpful assistant. You will be given:  
@@ -59,9 +70,34 @@ class LLMAgent:
         return res.responses
 
 
-if __name__ == "__main__":
-    from dotenv import load_dotenv
+class MetadataExtractionAgent:
 
-    load_dotenv()
-    llm = get_llm()
-    print(llm.invoke("Hi there").content)
+    def __init__(self, model: LLMModels):
+        self.llm = ChatOpenAI(
+            model=model.value,
+            base_url="https://openrouter.ai/api/v1",
+            api_key=os.getenv("OPENROUTER_API_KEY"),
+        ).with_structured_output(MetadataResponseFormat)
+
+        self.prompt = ChatPromptTemplate.from_template(
+            """You are a helpful assistant. You will be given:
+            The contents of a research paper in Markdown format.
+
+            Your task:
+            - Extract the title of the paper.
+            - Extract the authors of the paper. Remove any special characters from the authors' names.
+            - Only return a python dictionary with the keys "title" and "authors".
+
+            Here is the paper content:
+            {paper}
+            """
+        )
+
+    async def ainvoke(self, paper_content: str) -> MetadataResponseFormat:
+        chain = self.prompt | self.llm
+
+        res = await chain.ainvoke(
+            {"paper": paper_content[:1024]}
+        )  # Title and author can be found in the first few lines only, no need to pass full paper
+
+        return res

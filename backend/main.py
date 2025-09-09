@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 
 from backend.core.db import create_db_and_tables
-from backend.api import paper, llm
+from backend.api import paper, grid
 
 app = FastAPI()
 
 app.include_router(paper.router)
-app.include_router(llm.router)
+app.include_router(grid.router)
 
 
 @app.on_event("startup")
