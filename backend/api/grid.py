@@ -17,6 +17,11 @@ agent = CritiqueAgent(model=LLMModels.QWEN3_235_B)
 async def get_grids(session: SessionDep):
     return session.query(GridModel).all()
 
+@router.get("/{grid_id}")
+async def get_grid(grid_id: str, session: SessionDep):
+    df = pd.read_csv(f"{settings.GRIDS_STORAGE_DIR}/{grid_id}.csv", index_col=0)
+    return df.to_dict(orient="index")
+
 @router.post("/")
 async def new_grid(
     name: Annotated[str, "Name of the grid"],
